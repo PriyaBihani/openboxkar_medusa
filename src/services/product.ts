@@ -63,56 +63,9 @@ class ProductService extends MedusaProductService {
     //   config.relations?.push("store");
     // }
     // config.relations?.push("store");
+    // console.log({ selector, config });
 
-    const res = await super.listAndCount(
-      {
-        sales_channel_id: ["sc_01HH9XDG9G0T6HP2SVJCF90KYZ"],
-        status: ["published"],
-        categories: { is_internal: false, is_active: true },
-      },
-      {
-        select: [
-          "id",
-          "title",
-          // "subtitle",
-          // "status",
-          // "external_id",
-          // "description",
-          // "handle",
-          // "is_giftcard",
-          // "discountable",
-          // "thumbnail",
-          // "collection_id",
-          // "type_id",
-          // "weight",
-          // "length",
-          // "height",
-          // "width",
-          // "hs_code",
-          // "origin_country",
-          // "mid_code",
-          // "material",
-          // "created_at",
-          // "updated_at",
-          // "deleted_at",
-          // "metadata",
-        ],
-        relations: [
-          "variants",
-          "variants.prices",
-          "variants.options",
-          // "options",
-          // "options.values",
-          // "images",
-          // "tags",
-          // "collection",
-          // "type",
-          // "profiles",
-        ],
-      }
-    );
-    console.log({ selector, config });
-
+    const res = await super.listAndCount(selector, config);
     // console.log(res);
     return res;
   }
@@ -139,6 +92,7 @@ class ProductService extends MedusaProductService {
 
   async create(productObject: CreateProductInput): Promise<Product> {
     console.log("HERE");
+    console.log("logged", this.loggedInUser_);
     if (!productObject.store_id && this.loggedInUser_?.store_id) {
       productObject.store_id = this.loggedInUser_.store_id;
     }
