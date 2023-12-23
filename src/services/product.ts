@@ -1,0 +1,150 @@
+import { Lifetime } from "awilix";
+import {
+  ProductService as MedusaProductService,
+  Product,
+  User,
+} from "@medusajs/medusa";
+import {
+  CreateProductInput as MedusaCreateProductInput,
+  FindProductConfig,
+  ProductSelector as MedusaProductSelector,
+} from "@medusajs/medusa/dist/types/product";
+
+type ProductSelector = {
+  store_id?: string;
+} & MedusaProductSelector;
+
+type CreateProductInput = {
+  store_id?: string;
+} & MedusaCreateProductInput;
+
+class ProductService extends MedusaProductService {
+  static LIFE_TIME = Lifetime.SCOPED;
+  protected readonly loggedInUser_: User | null;
+
+  constructor(container, options) {
+    // @ts-expect-error prefer-rest-params
+    super(...arguments);
+
+    try {
+      this.loggedInUser_ = container.loggedInUser;
+    } catch (e) {
+      // avoid errors when backend first runs
+    }
+  }
+
+  async list(
+    selector: ProductSelector,
+    config?: FindProductConfig
+  ): Promise<Product[]> {
+    console.log("HERE I AM IN LIST");
+    if (selector.store_id && this.loggedInUser_?.store_id) {
+      selector.store_id = this.loggedInUser_.store_id;
+      config.select?.push("store_id");
+      config.relations?.push("store");
+    }
+
+    return await super.list(selector, config);
+  }
+
+  async listAndCount(
+    selector: ProductSelector,
+    config?: FindProductConfig
+  ): Promise<[Product[], number]> {
+    // console.log("HERE I AM IN LIST AND COUNT");
+    // console.log(selector, this.loggedInUser_);
+    // if (
+    //   selector.store_id &&
+    //   this.loggedInUser_?.store_id &&
+    //   selector.store_id === this.loggedInUser_.store_id
+    // ) {
+    //   selector.store_id = this.loggedInUser_.store_id;
+    //   config.select?.push("store_id");
+    //   config.relations?.push("store");
+    // }
+    // config.relations?.push("store");
+
+    const res = await super.listAndCount(
+      {
+        sales_channel_id: ["sc_01HH9XDG9G0T6HP2SVJCF90KYZ"],
+        status: ["published"],
+        categories: { is_internal: false, is_active: true },
+      },
+      {
+        select: [
+          "id",
+          "title",
+          // "subtitle",
+          // "status",
+          // "external_id",
+          // "description",
+          // "handle",
+          // "is_giftcard",
+          // "discountable",
+          // "thumbnail",
+          // "collection_id",
+          // "type_id",
+          // "weight",
+          // "length",
+          // "height",
+          // "width",
+          // "hs_code",
+          // "origin_country",
+          // "mid_code",
+          // "material",
+          // "created_at",
+          // "updated_at",
+          // "deleted_at",
+          // "metadata",
+        ],
+        relations: [
+          "variants",
+          "variants.prices",
+          "variants.options",
+          // "options",
+          // "options.values",
+          // "images",
+          // "tags",
+          // "collection",
+          // "type",
+          // "profiles",
+        ],
+      }
+    );
+    console.log({ selector, config });
+
+    // console.log(res);
+    return res;
+  }
+
+  async retrieve(
+    productId: string,
+    config?: FindProductConfig
+  ): Promise<Product> {
+    config.relations = [...(config.relations || []), "store"];
+
+    const product = await super.retrieve(productId, config);
+
+    if (
+      product.store?.id &&
+      this.loggedInUser_?.store_id &&
+      product.store.id !== this.loggedInUser_.store_id
+    ) {
+      // Throw error if you don't want a product to be accessible to other stores
+      throw new Error("Product does not exist in store.");
+    }
+
+    return product;
+  }
+
+  async create(productObject: CreateProductInput): Promise<Product> {
+    console.log("HERE");
+    if (!productObject.store_id && this.loggedInUser_?.store_id) {
+      productObject.store_id = this.loggedInUser_.store_id;
+    }
+
+    return await super.create(productObject);
+  }
+}
+
+export default ProductService;
