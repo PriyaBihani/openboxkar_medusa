@@ -38,7 +38,7 @@ class ProductService extends MedusaProductService {
     config?: FindProductConfig
   ): Promise<Product[]> {
     console.log("HERE I AM IN LIST");
-    if (selector.store_id && this.loggedInUser_?.store_id) {
+    if (!selector.store_id && this.loggedInUser_?.store_id) {
       selector.store_id = this.loggedInUser_.store_id;
       config.select?.push("store_id");
       config.relations?.push("store");
@@ -51,23 +51,15 @@ class ProductService extends MedusaProductService {
     selector: ProductSelector,
     config?: FindProductConfig
   ): Promise<[Product[], number]> {
-    // console.log("HERE I AM IN LIST AND COUNT");
-    // console.log(selector, this.loggedInUser_);
-    // if (
-    //   selector.store_id &&
-    //   this.loggedInUser_?.store_id &&
-    //   selector.store_id === this.loggedInUser_.store_id
-    // ) {
-    //   selector.store_id = this.loggedInUser_.store_id;
-    //   config.select?.push("store_id");
-    //   config.relations?.push("store");
-    // }
-    // config.relations?.push("store");
-    // console.log({ selector, config });
+    console.log("HERE I AM IN LIST AND COUNT");
 
-    const res = await super.listAndCount(selector, config);
-    // console.log(res);
-    return res;
+    if (!selector.store_id && this.loggedInUser_?.store_id) {
+      selector.store_id = this.loggedInUser_.store_id;
+      config.select?.push("store_id");
+      config.relations?.push("store");
+    }
+
+    return await super.listAndCount(selector, config);
   }
 
   async retrieve(

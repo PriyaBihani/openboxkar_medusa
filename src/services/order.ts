@@ -42,8 +42,9 @@ class OrderService extends MedusaOrderService {
   async retrieve(orderId: string, config?: FindConfig<Order>): Promise<Order> {
     config.relations = [...(config.relations || []), "store"];
     const order = await super.retrieve(orderId, config);
-
+    console.log({ order });
     if (
+      order.store &&
       order.store.id &&
       this.loggedInUser_?.store_id &&
       order.store_id !== this.loggedInUser_.store_id

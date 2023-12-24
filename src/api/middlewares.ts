@@ -7,7 +7,7 @@ import type {
 import { UserService } from "@medusajs/medusa";
 import { User } from "./../models/user";
 import { authenticate } from "@medusajs/medusa";
-import * as cors from "cors";
+import cors from "cors";
 
 async function registerLoggedInUser(
   req: MedusaRequest,
@@ -63,7 +63,7 @@ export const config: MiddlewaresConfig = {
   routes: [
     {
       matcher: /\/admin\/[^(auth)].*/,
-      middlewares: [cors(adminCors), , authenticate(), registerLoggedInUser],
+      middlewares: [cors(adminCors), authenticate(), registerLoggedInUser],
     },
     {
       matcher: "/store/custom",
