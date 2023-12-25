@@ -53,9 +53,6 @@ class OrderService extends MedusaOrderService {
     }
     return order;
   }
-  //   async createFromCart(cartOrId: string | Cart): Promise<Order> {
-
-  //   }
 }
 
 export default OrderService;
